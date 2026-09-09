@@ -19,7 +19,7 @@ def config_read():
 		return data
 
 
-def config_write(maze_grid, data):
+def config_write(maze_grid, data, roadmap):
 	try:
 		with open("maze.txt", "w", encoding="utf-8") as dosya:
 			for row in maze_grid:
@@ -30,7 +30,9 @@ def config_write(maze_grid, data):
 				line = "".join(hex_row)
 				dosya.write(line + "\n")
 			dosya.write("\nENTRY= " + data["ENTRY"])
-			dosya.write("\nEXIT= " + data["EXIT"])
+			dosya.write("\nEXIT= " + data["EXIT"] + "\n\n")
+			road_line = "".join(roadmap)
+			dosya.write(road_line)
 	except Exception as e:
 		print("Dosya yazılamadı", e)
 
@@ -109,8 +111,6 @@ def algorithm():
 				current_x, current_y = stack[-1]
 
 	bfs(y, x, maze_grid, data)
-	config_write(maze_grid, data)
-	print_maze(maze_grid)
 	
 def bfs(y, x, maze_grid, data):
 	visited_lst = visited_list(y, x, maze_grid)
@@ -143,27 +143,45 @@ def bfs(y, x, maze_grid, data):
 						visited_lst[new_y][new_x] = True
 						parent[(new_x, new_y)] = ((current_x, current_y), route[0].upper())
 						queue.append((new_x, new_y))
-path_letters = []
-    if found:
-        curr = (finish_x, finish_y)
-        while parent[curr] is not None:
-            prev_cell, letter = parent[curr]
-            path_letters.append(letter)
-            curr = prev_cell
-        path_letters.reverse()
+
+
+
+	path_coords = set()
+	path_letters = []
+	if finded:
+		curr = (finish_x, finish_y)
+		while parent[curr] is not None:
+			prev_cell, letter = parent[curr]
+			path_letters.append(letter)
+			curr = prev_cell
+			path_coords.add(curr)
+		path_letters.reverse()
+
+	print_maze(maze_grid, path_coords)
+	config_write(maze_grid, data, path_letters)
+	
         
-    print("Bulunan En Kısa Yol Harfleri:", "".join(path_letters))
-def print_maze(maze_grid):
-    height = len(maze_grid)       # Satır sayısı (y)
-    width = len(maze_grid[0])     # Sütun sayısı (x)
+def print_maze(maze_grid, path_coords=None):
+    if path_coords is None:
+        path_coords = set()
+        
+    height = len(maze_grid)
+    width = len(maze_grid[0])
     
     print("+" + "---+" * width)
     
     for y in range(height):
         line = "|"
         for x in range(width):
-            cell = maze_grid[y][x]  # Dikkat: Önce y, sonra x okunmalı!
-            bottom = "___" if (cell & 4) else "   "
+            cell = maze_grid[y][x]
+            
+            # Eğer yol üzerindeyse ortaya nokta veya yıldız koyalım, değilse boşluk
+            if (x, y) in path_coords:
+                center = " * "
+            else:
+                center = "   "
+                
+            bottom = "___" if (cell & 4) else center
             right = "|" if (cell & 2) else " "
             line += bottom + right
         print(line)
