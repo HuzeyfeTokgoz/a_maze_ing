@@ -119,15 +119,40 @@ def bfs(y, x, maze_grid, data):
 	parent = {(x, y): None}
 	finded = False
 
-	while queue:
-		cx, cy = queue.popleft()
+	directions = {
+			"North": (0, -1, 1),
+			"East": (1, 0, 2),
+			"South": (0, 1, 4),
+			"West": (-1, 0, 8)
+		}
 
-		if cx == finish_x and cy == finish_y:
+	while queue:
+		current_x, current_y = queue.popleft()
+
+		if current_x == finish_x and current_y == finish_y:
 			finded = True
 			break
-		cell_value = maze_grid[cy][cx]
-		print(cell_value)
+		cell_value = maze_grid[current_y][current_x]
 
+		for route, (dx, dy, bit) in directions.items():
+			new_x, new_y = current_x + dx, current_y + dy
+
+			if 0 <= new_x < int(data["WIDTH"]) and 0 <= new_y < int(data["HEIGHT"]):
+				if not visited_lst[new_y][new_x]:
+					if (cell_value & bit) == 0:
+						visited_lst[new_y][new_x] = True
+						parent[(new_x, new_y)] = ((current_x, current_y), route[0].upper())
+						queue.append((new_x, new_y))
+path_letters = []
+    if found:
+        curr = (finish_x, finish_y)
+        while parent[curr] is not None:
+            prev_cell, letter = parent[curr]
+            path_letters.append(letter)
+            curr = prev_cell
+        path_letters.reverse()
+        
+    print("Bulunan En Kısa Yol Harfleri:", "".join(path_letters))
 def print_maze(maze_grid):
     height = len(maze_grid)       # Satır sayısı (y)
     width = len(maze_grid[0])     # Sütun sayısı (x)
