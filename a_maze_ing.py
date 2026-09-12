@@ -1,5 +1,4 @@
 import random
-import sys
 from collections import deque
 
 
@@ -21,16 +20,25 @@ def config_read(path):
 		return data
 
 
-def parse_cell(data, key, width, height):
+def parse_cell(data, key, maze_grid):
 	''' Config'ten x,y koordinati okur, sinirlari dogrular '''
 	try:
 		x, y = map(int, data[key].split(','))
 	except (KeyError, ValueError):
 		print(f"{key} degeri gecersiz veya eksik (x,y formatinda olmali)")
 		return None
-	if not (0 <= x < width and 0 <= y < height):
-		print(f"{key}={x},{y} labirent sinirlarinin disinda ({width}x{height})")
+
+	try:
+		if maze_grid[x][y] == 15:
+			raise ValueError("hatalı entry/finish noktası")
+	except ValueError as e:
+		print(e)
 		return None
+
+	if not (0 <= x < int(data["WIDTH"]) and 0 <= y < int(data["WIDTH"])):
+		print(f"{key}={x},{y} labirent sinirlarinin disinda")
+		return None
+
 	return (x, y)
 
 
@@ -46,6 +54,7 @@ def config_write(maze_grid, data, roadmap):
 				dosya.write(line + "\n")
 			dosya.write("\n" + data["ENTRY"] + "\n")
 			dosya.write(data["EXIT"] + "\n\n")
+
 			road_line = "".join(roadmap)
 			dosya.write(road_line)
 	except Exception as e:
@@ -54,7 +63,7 @@ def config_write(maze_grid, data, roadmap):
 
 def maze(data):
 	''' Grid hazirlanmasi '''
-	seed_val = data.get("SEED", 42)
+	seed_val = data.get("SEED")
 	random.seed(seed_val)
 	maze_grid = []
 
@@ -66,9 +75,7 @@ def maze(data):
 	return maze_grid
 
 
-def visited_list(cell, maze_grid):
-	x, y = cell
-
+def visited_list(maze_grid):
 	visited = []
 	for i in maze_grid:
 		row = []
@@ -76,7 +83,6 @@ def visited_list(cell, maze_grid):
 			row.append(False)
 		visited.append(row)
 
-	visited[y][x] = True
 	return visited
 
 
@@ -121,15 +127,16 @@ def break_wall(maze_grid, directions, cell, route):
 	maze_grid[y + dy][x + dx] &= ~directions[opposite_route]["bit"]
 
 
-def bfs(cell, maze_grid, data, directions):
+def bfs(cell, maze_grid, data, directions, finish_cell):
 	''' en kisa yolu bulma algoritmasi '''
 	x, y = cell
-	visited_lst = visited_list(cell, maze_grid)
-	finish_x, finish_y = map(int, data["EXIT"].split(','))
+	finish_x, finish_y = finish_cell
+	visited_lst = visited_list(maze_grid)
+	visited_lst[y][x] = True
+
 	queue = deque([(x, y)])
 	parent = {(x, y): None}
 	finded = False
-
 	while queue:
 		current_x, current_y = queue.popleft()
 
@@ -260,23 +267,27 @@ def main():
 		"West":{"bit": 8, "opposite": "East", "coor": (-1, 0)}
 	}
 
-	data = config_read()
+	data = config_read("config.txt")
 	if not data:
 		return
 
 	maze_grid = maze(data)
-	x, y = map(int, data["ENTRY"].split(','))
-	cell = ((x, y))
+	visited_lst = visited_list(maze_grid)
 
-	visited_lst = visited_list(cell, maze_grid)
-	ft_pattern(data, maze_grid, visited_lst)
+	x, y = parse_cell(data, "ENTRY", maze_grid)
+	finish_x, finish_y = parse_cell(data, "EXIT", visited_lst)
+	visited_lst[y][x] = True
+
+	cell = ((x, y))
+	finish_cell = ((finish_x, finish_y))
 
 	algorithm(data, maze_grid, cell, visited_lst, directions)
 
-	if data.get("PERFECT", "True").strip().lower() not in ("true", "1", "yes"):
+	if data.get("PERFECT", "True").strip().lower() not in ("true", "1"):
 		grid_analyzer(maze_grid, data, directions)
 
-	path_letters = bfs(cell, maze_grid, data, directions)
+	path_letters = bfs(cell, maze_grid, data, directions, finish_cell)
+	ft_pattern(data, maze_grid, visited_lst)
 	config_write(maze_grid, data, path_letters)
 
 if __name__ == "__main__":
