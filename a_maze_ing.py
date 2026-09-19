@@ -19,6 +19,8 @@ def config_read(path):
 	else:
 		return data
 
+def parser(data):
+	pass
 
 def parse_cell(data, key, maze_grid):
 	''' Config'ten x,y koordinati okur, sinirlari dogrular '''
@@ -28,12 +30,12 @@ def parse_cell(data, key, maze_grid):
 		print(f"{key} degeri gecersiz veya eksik (x,y formatinda olmali)")
 		return None
 
-	try:
-		if maze_grid[x][y] == 15:
-			raise ValueError("hatalı entry/finish noktası")
-	except ValueError as e:
-		print(e)
-		return None
+	# try:
+	# 	if maze_grid[x][y] == 15:
+	# 		raise ValueError("hatalı entry/finish noktası")
+	# except ValueError as e:
+	# 	print(e)
+	# 	return None
 
 	if not (0 <= x < int(data["WIDTH"]) and 0 <= y < int(data["WIDTH"])):
 		print(f"{key}={x},{y} labirent sinirlarinin disinda")
