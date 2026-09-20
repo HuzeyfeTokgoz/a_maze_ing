@@ -1,25 +1,21 @@
-from error import ConfigError
-
+from mazegen.error import ConfigError
+from dataclasses import dataclass
+ 
 MANDATORY_KEYS = [
 	"WIDTH", "HEIGHT", "ENTRY", "EXIT", "OUTPUT_FILE", "PERFECT",
 ]
 
-
+@dataclass
 class MazeConfig:
 	"""Holds the values read from the configuration file."""
 
-	def __init__(self, width: int, height: int,
-				 entry: tuple[int, int], exit: tuple[int, int],
-				 output_file: str, perfect: bool,
-				 seed: int | None) -> None:
-		"""Store the parsed configuration values."""
-		self.width = width
-		self.height = height
-		self.entry = entry
-		self.exit = exit
-		self.output_file = output_file
-		self.perfect = perfect
-		self.seed = seed
+	width: int
+	height: int
+	entry: tuple[int, int]
+	exit: tuple[int, int]
+	output_file: str
+	perfect: bool
+	seed: int | None
 
 
 def config_read(path):
