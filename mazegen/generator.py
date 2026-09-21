@@ -3,7 +3,7 @@ from collections import deque
 from .writer import write_output
 from .parser import parse_config
 from show import print_maze
-
+from print_maze import print_maze1
 Coord = tuple[int, int]
 
 
@@ -50,6 +50,7 @@ class MazeGenerator:
 		self.perfect = config.perfect
 		self.output_file = config.output_file
 
+
 		self._rnb_gen = random.Random(config.seed)
 		self.grid: list[list[int]] = [[15] * self.width for _ in range(self.height)]
 		self.pattern_cells = self._pattern_cells()
@@ -61,6 +62,8 @@ class MazeGenerator:
 		for name, cell in (("ENTRY", self.entry), ("EXIT", self.exit)):
 			if cell in self.pattern_cells:
 				raise ValueError(f"{name} {cell} is inside the '42' pattern")
+
+
 
 	def _in_bounds(self, x: int, y: int) -> bool:
 		"""Return True if (x, y) is inside the maze."""
@@ -130,10 +133,10 @@ class MazeGenerator:
 		if not self.perfect:
 			self._braid()
 
-		self.solution = self.solve()
+		self.solution, path_coords = self.solve()
 
 	#	print_maze(self.grid, self.entry, self.exit, self.solution, self.pattern_cells)
-		print_maze1(self.grid, self.entry, self.exit, self.width, self.height)
+		print_maze1(self.grid, self.entry, self.exit, self.width, self.height, path_coords)
 		try:
 			write_output(self.output_file, self.grid, self.entry,
 				self.exit, self.solution)
@@ -146,6 +149,7 @@ class MazeGenerator:
 		visited = {start} #
 		parent: dict[Coord, tuple[Coord, str]] = {}
 		queue = deque([start])
+		path_coords = []
 
 		while queue:
 			x, y = queue.popleft()
@@ -169,36 +173,6 @@ class MazeGenerator:
 			prev, direction = parent[cell]
 			path.append(direction)
 			cell = prev
+			path_coords.append(cell)
 		path.reverse()
-		return "".join(path)
-
-
-def print_maze1(grid, entry, finish, width, height):
-
-	üst_satir = "+"
-	for _ in range(width):
-		üst_satir += "---+"
-	print(üst_satir)
-
-	for y in range(height):
-		orta_satir = "|"
-		alt_satir = "+"
-		for x in range(width):
-			hücre = (x, y)
-			if hücre == entry:
-				orta_satir += " E "
-			elif hücre == finish:
-				orta_satir += " X "
-			
-			elif grid[y][x] == 15:
-				orta_satir += "#"
-
-				
-			else:
-				orta_satir += "    "
-			if grid[y][x] & 4:
-				alt_satir += "---+"
-			else:
-				alt_satir += "   +"
-		print(orta_satir)
-		print(alt_satir)
+		return "".join(path), path_coords
