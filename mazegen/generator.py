@@ -132,8 +132,8 @@ class MazeGenerator:
 
 		self.solution = self.solve()
 
-		print_maze(self.grid, self.entry, self.exit, self.solution, self.pattern_cells)
-
+	#	print_maze(self.grid, self.entry, self.exit, self.solution, self.pattern_cells)
+		print_maze1(self.grid, self.entry, self.exit, self.width, self.height)
 		try:
 			write_output(self.output_file, self.grid, self.entry,
 				self.exit, self.solution)
@@ -171,3 +171,34 @@ class MazeGenerator:
 			cell = prev
 		path.reverse()
 		return "".join(path)
+
+
+def print_maze1(grid, entry, finish, width, height):
+
+	üst_satir = "+"
+	for _ in range(width):
+		üst_satir += "---+"
+	print(üst_satir)
+
+	for y in range(height):
+		orta_satir = "|"
+		alt_satir = "+"
+		for x in range(width):
+			hücre = (x, y)
+			if hücre == entry:
+				orta_satir += " E "
+			elif hücre == finish:
+				orta_satir += " X "
+			
+			elif grid[y][x] == 15:
+				orta_satir += "#"
+
+				
+			else:
+				orta_satir += "    "
+			if grid[y][x] & 4:
+				alt_satir += "---+"
+			else:
+				alt_satir += "   +"
+		print(orta_satir)
+		print(alt_satir)
