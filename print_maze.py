@@ -20,7 +20,7 @@ def print_maze1(grid, entry, finish, width, height, path_coords: list[tuple] | N
 	if not color:
 		color = sifirla
 	if not path_coords:
-		path_coords = [()]
+		path_coords = []
 
 	üst_satir = color + "+"
 	for _ in range(width):

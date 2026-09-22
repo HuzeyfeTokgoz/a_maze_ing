@@ -54,6 +54,7 @@ class MazeGenerator:
 		self._rnb_gen = random.Random(config.seed)
 		self.grid: list[list[int]] = [[15] * self.width for _ in range(self.height)]
 		self.pattern_cells = self._pattern_cells()
+		self.path_coords: list[tuple] = []
 		self.solution: str = ""
 
 		if not self.pattern_cells:
@@ -133,10 +134,8 @@ class MazeGenerator:
 		if not self.perfect:
 			self._braid()
 
-		self.solution, path_coords = self.solve()
+		self.solution, self.path_coords = self.solve()
 
-	#	print_maze(self.grid, self.entry, self.exit, self.solution, self.pattern_cells)
-		print_maze1(self.grid, self.entry, self.exit, self.width, self.height, path_coords)
 		try:
 			write_output(self.output_file, self.grid, self.entry,
 				self.exit, self.solution)
@@ -175,4 +174,6 @@ class MazeGenerator:
 			cell = prev
 			path_coords.append(cell)
 		path.reverse()
-		return "".join(path), path_coords
+		if path:
+			path_str = "".join(path)
+		return path_str, path_coords
