@@ -9,6 +9,9 @@ __pycache__/
 *.py[cod]
 .mypy_cache/
 
+# Maze written by `make run`
+maze.txt
+
 # Build artifacts (the mazegen-*.whl at the repo root must stay tracked)
 build/
 dist/

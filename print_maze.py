@@ -1,9 +1,8 @@
 """Terminal rendering of a maze."""
 from themes import RESET, Theme
 
+CLEAR_SCREEN = "\033[H\033[2J\033[3J"
 Coord = tuple[int, int]
-
-CLEAR_SCREEN = "\033[2J\033[H"
 
 
 def _paint(text: str, color: str) -> str:
