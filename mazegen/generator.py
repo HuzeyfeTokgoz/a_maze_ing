@@ -2,8 +2,6 @@ import random
 from collections import deque
 from .writer import write_output
 from .parser import parse_config
-from show import print_maze
-from print_maze import print_maze1
 Coord = tuple[int, int]
 
 
@@ -142,13 +140,13 @@ class MazeGenerator:
 		except OSError as e:
 			print(f"Error: cannot write '{self.output_file}': {e}")
 
-	def solve(self) -> str:
+	def solve(self) -> tuple[str, list[Coord]]:
 		'''en kısa yolu buldurur bfs'''
 		start = self.entry
 		visited = {start} #
 		parent: dict[Coord, tuple[Coord, str]] = {}
 		queue = deque([start])
-		path_coords = []
+		path_coords: list[Coord] = []
 
 		while queue:
 			x, y = queue.popleft()

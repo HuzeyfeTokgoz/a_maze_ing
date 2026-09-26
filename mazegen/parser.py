@@ -4,6 +4,7 @@ from dataclasses import dataclass
 MANDATORY_KEYS = [
 	"WIDTH", "HEIGHT", "ENTRY", "EXIT", "OUTPUT_FILE", "PERFECT",
 ]
+Coord = tuple[int, int]
 
 @dataclass
 class MazeConfig:
@@ -11,8 +12,8 @@ class MazeConfig:
 
 	width: int
 	height: int
-	entry: tuple[int, int]
-	exit: tuple[int, int]
+	entry: Coord
+	exit: Coord
 	output_file: str
 	perfect: bool
 	seed: int | None
@@ -45,7 +46,7 @@ def config_read(path):
 	return data
 
 
-def _parse_cell(key: str, value: str) -> tuple[int, int]:
+def _parse_cell(key: str, value: str) -> Coord:
 	parts = value.split(",")
 	if len(parts) != 2:
 		raise ConfigError(f"{key} must be in 'x,y' format, got '{value}'")
