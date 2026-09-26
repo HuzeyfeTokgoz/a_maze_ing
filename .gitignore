@@ -1,2 +1,15 @@
+# Environment
 .env
-/a_maze
+
+# Virtual environment (virtualenv)
+/a_maze/
+
+# Python caches
+__pycache__/
+*.py[cod]
+.mypy_cache/
+
+# Build artifacts (the mazegen-*.whl at the repo root must stay tracked)
+build/
+dist/
+*.egg-info/
