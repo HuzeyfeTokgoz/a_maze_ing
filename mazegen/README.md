@@ -1,16 +1,17 @@
 # mazegen
 
-Reusable maze generator from the A-Maze-ing project.
-It builds a maze with a depth-first search, can add loops to it, and finds
-the shortest path from the entry to the exit with a breadth-first search.
+A-Maze-ing projesinden çıkan, tekrar kullanılabilir labirent üreticisi.
+Labirenti derinlik öncelikli arama (DFS) ile oluşturur, isteğe bağlı olarak
+içine döngüler ekler ve girişten çıkışa en kısa yolu genişlik öncelikli
+arama (BFS) ile bulur.
 
-## Install
+## Kurulum
 
 ```
 pip install mazegen-1.0.0-py3-none-any.whl
 ```
 
-## Basic example
+## Temel örnek
 
 ```python
 from mazegen import MazeGenerator
@@ -18,41 +19,42 @@ from mazegen import MazeGenerator
 generator = MazeGenerator(20, 15, (0, 0), (19, 14))
 generator.generate()
 
-print(generator.solution)   # shortest path, e.g. "EESSWS..."
+print(generator.solution)   # en kısa yol, örneğin "EESSWS..."
 ```
 
-## Custom parameters
+## Parametreler
 
 ```python
 MazeGenerator(width, height, entry, exit, perfect=False, seed=None)
 ```
 
-| Parameter | Meaning |
-|-----------|---------|
-| `width`, `height` | Size of the maze, in cells |
-| `entry`, `exit` | `(x, y)` cells, inside the maze and different |
-| `perfect` | `True`: exactly one path between two cells. `False` (default): a maze with loops, at least 5x5 |
-| `seed` | Same seed gives the same mazes. `None` gives a random maze |
+| Parametre | Anlamı |
+|-----------|--------|
+| `width`, `height` | Hücre cinsinden labirent boyutu |
+| `entry`, `exit` | `(x, y)` hücreleri; labirentin içinde ve birbirinden farklı |
+| `perfect` | `True`: iki hücre arasında tam olarak bir yol. `False` (varsayılan): döngülü labirent, en az 5x5 |
+| `seed` | Aynı seed aynı labirentleri verir. `None` rastgele bir labirent verir |
 
-Invalid parameters raise `ValueError`.
-Calling `generate()` again builds a new maze.
+Geçersiz parametreler `ValueError` fırlatır.
+`generate()` tekrar çağrıldığında yeni bir labirent üretir.
 
-## Access the maze and the solution
+## Labirente ve çözüme erişim
 
-- `generator.grid`: list of rows, `grid[y][x]` is the cell at `(x, y)`.
-  Each cell is an int whose bits are its closed walls:
-  North = 1, East = 2, South = 4, West = 8 (15 = all walls closed).
-- `generator.solution`: shortest path as a string of `N`, `E`, `S`, `W`.
-- `generator.path_coords`: cells of the shortest path, from entry to exit.
-- `generator.pattern_cells`: closed cells drawing the "42"
-  (empty when the maze is too small for it).
+- `generator.grid`: satırların listesi; `grid[y][x]`, `(x, y)`
+  hücresidir. Her hücre, bitleri kapalı duvarları gösteren bir tam
+  sayıdır: Kuzey = 1, Doğu = 2, Güney = 4, Batı = 8 (15 = bütün duvarlar
+  kapalı).
+- `generator.solution`: `N`, `E`, `S`, `W` harflerinden oluşan en kısa yol.
+- `generator.path_coords`: girişten çıkışa en kısa yolun hücreleri.
+- `generator.pattern_cells`: "42"yi çizen kapalı hücreler (labirent
+  "42" için çok küçükse boş).
 
-## Config file and output file (optional)
+## Config dosyası ve çıktı dosyası (isteğe bağlı)
 
 ```python
 from mazegen import ConfigError, MazeGenerator, parse_config, write_output
 
-config = parse_config("config.txt")      # raises ConfigError if invalid
+config = parse_config("config.txt")      # geçersizse ConfigError fırlatır
 generator = MazeGenerator(config.width, config.height, config.entry,
                           config.exit, config.perfect, config.seed)
 generator.generate()
