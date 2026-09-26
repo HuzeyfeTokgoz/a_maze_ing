@@ -1,14 +1,25 @@
-# install = pip install -r requirements.txt
-# run = python main.py
-# clean = rm -rf .....
-# lint = flake8 . && mypy . --warn-return-any
-# --warn-unused-ignores --ignore-missing-imports --disallow-untyped-defs --check-untyped-defs
-# lint--strict = flake8 . && mypy --strict .
+PYTHON = python3
+MAIN   = a_maze_ing.py
+CONFIG = config.txt
+
+install:
+	$(PYTHON) -m pip install flake8 mypy build
 
 run:
-	python a_maze_ing_1.py config.txt
+	$(PYTHON) $(MAIN) $(CONFIG)
 
-test: run
-	./maze_analyzer.py maze.txt
+debug:
+	$(PYTHON) -m pdb $(MAIN) $(CONFIG)
 
-.PHONY: run, test
+clean:
+	rm -rf __pycache__ mazegen/__pycache__ .mypy_cache build dist *.egg-info
+
+lint:
+	flake8 .
+	mypy . --warn-return-any --warn-unused-ignores --ignore-missing-imports --disallow-untyped-defs --check-untyped-defs
+
+lint-strict:
+	flake8 .
+	mypy . --strict
+
+.PHONY: install run debug clean lint lint-strict

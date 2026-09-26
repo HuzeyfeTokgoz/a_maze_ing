@@ -1,0 +1,8 @@
+[flake8]
+exclude =
+    .git,
+    __pycache__,
+    .mypy_cache,
+    a_maze,
+    build,
+    dist
