@@ -250,12 +250,12 @@ Projeyi iki kişi yaptık:
 
 - **hutokgoz**: labirent üretimi ve `mazegen` paketi. DFS ile labirent
   oluşturma, `PERFECT=False` için döngü ekleme (braiding), BFS ile en
-  kısa yol, "42" deseni, `MazeGenerator` sınıfı, `pyproject.toml` ve
-  wheel.
+  kısa yol, "42" deseni, `MazeGenerator` sınıfı, `pyproject.toml` ve 
+  menü (`a_maze_ing.py`).
 - **mburdurl**: programın kullanıcıya bakan tarafı. Config dosyasını
   okuma ve kontrol etme (`parser.py`, `error.py`), çıktı dosyası
   (`writer.py`), terminalde çizim (`print_maze.py`), renk temaları
-  (`themes.py`) ve menü (`a_maze_ing.py`).
+  (`themes.py`).
 
 Makefile, lint ayarları, README ve testleri birlikte yaptık.
 
