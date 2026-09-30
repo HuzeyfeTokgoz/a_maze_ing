@@ -1,16 +1,9 @@
 """Entry point of A-Maze-ing: generate a maze and display it in a terminal."""
 import sys
 
-from mazegen import ConfigError, MazeGenerator, parse_config, write_output
+from mazegen import ConfigError, MazeGenerator
 from print_maze import print_maze
 from themes import THEMES
-
-
-def new_maze(generator: MazeGenerator, output_file: str) -> None:
-    """Generate a new maze and write it to the output file."""
-    generator.generate()
-    write_output(output_file, generator.grid, generator.entry,
-                 generator.exit, generator.solution)
 
 
 def draw_maze(generator: MazeGenerator, show_path: bool,
@@ -34,10 +27,8 @@ def main() -> None:
         sys.exit(1)
 
     try:
-        config = parse_config(sys.argv[1])
-        generator = MazeGenerator(config.width, config.height, config.entry,
-                                  config.exit, config.perfect, config.seed)
-        new_maze(generator, config.output_file)
+        generator = MazeGenerator(sys.argv[1])
+        generator.generate()
 
         show_path = True
         theme_index = 0
@@ -52,7 +43,7 @@ def main() -> None:
                            "\nChoice (1-4): ").strip()
 
             if choice == "1":
-                new_maze(generator, config.output_file)
+                generator.generate()
             elif choice == "2":
                 show_path = not show_path
             elif choice == "3":

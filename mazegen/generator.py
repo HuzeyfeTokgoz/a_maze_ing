@@ -2,7 +2,8 @@
 import random
 from collections import deque
 
-from .parser import Coord
+from .parser import Coord, parse_config
+from .writer import write_output
 
 
 class MazeGenerator:
@@ -12,8 +13,8 @@ class MazeGenerator:
     North = 1, East = 2, South = 4, West = 8 (15 = all walls closed).
 
     Example:
-        >>> generator = MazeGenerator(20, 15, (0, 0), (19, 14), seed=42)
-        >>> generator.generate()
+        >>> generator = MazeGenerator("config.txt")
+        >>> generator.generate()      # also writes OUTPUT_FILE
         >>> generator.grid[0][0]      # walls of the top-left cell
         >>> generator.solution        # shortest path, e.g. "EESSW..."
 
@@ -23,6 +24,7 @@ class MazeGenerator:
         entry: Entry cell (x, y).
         exit: Exit cell (x, y).
         perfect: True for a single path between any two cells.
+        output_file: File written by generate().
         grid: Wall bitmask of every cell, indexed as grid[y][x].
         pattern_cells: Fully closed cells drawing the '42' (may be empty).
         solution: Shortest path from entry to exit as N/E/S/W letters.
@@ -48,48 +50,44 @@ class MazeGenerator:
 
     MIN_LOOP_SIZE = 5
 
-    def __init__(self, width: int, height: int, entry: Coord, exit: Coord,
-                 perfect: bool = False, seed: int | None = None) -> None:
-        """Check the parameters and prepare an empty maze.
+    def __init__(self, path: str) -> None:
+        """Read the configuration file and prepare an empty maze.
 
         Args:
-            width: Number of columns, at least 1.
-            height: Number of rows, at least 1.
-            entry: Entry cell (x, y), inside the maze.
-            exit: Exit cell (x, y), inside the maze and not the entry.
-            perfect: True for a perfect maze, False for a maze with loops.
-            seed: Seed of the random generator, None for a random maze.
+            path: Path of the configuration file (WIDTH, HEIGHT, ENTRY,
+                EXIT, OUTPUT_FILE, PERFECT and optional SEED).
 
         Raises:
-            ValueError: If the size, entry or exit is invalid, or the maze
-                is too small for loops when perfect is False.
+            ConfigError: If the file cannot be read or a value is invalid.
+            ValueError: If the entry or exit is invalid, or the maze is
+                too small for loops when PERFECT is False.
         """
-        if width <= 0 or height <= 0:
-            raise ValueError(
-                f"maze size must be positive, got {width}x{height}")
+        config = parse_config(path)
+        width, height = config.width, config.height
 
         size = self.MIN_LOOP_SIZE
-        if not perfect and (width < size or height < size):
+        if not config.perfect and (width < size or height < size):
             raise ValueError(
                 f"PERFECT=False needs a maze of at least {size}x{size}, "
                 f"got {width}x{height}")
 
-        for name, (x, y) in (("ENTRY", entry), ("EXIT", exit)):
+        for name, (x, y) in (("ENTRY", config.entry), ("EXIT", config.exit)):
             if not (0 <= x < width and 0 <= y < height):
                 raise ValueError(
                     f"{name} ({x}, {y}) is outside the maze "
                     f"({width}x{height})")
 
-        if entry == exit:
+        if config.entry == config.exit:
             raise ValueError("ENTRY and EXIT must be different cells")
 
         self.width = width
         self.height = height
-        self.entry = entry
-        self.exit = exit
-        self.perfect = perfect
+        self.entry = config.entry
+        self.exit = config.exit
+        self.perfect = config.perfect
+        self.output_file = config.output_file
 
-        self._rng = random.Random(seed)
+        self._rng = random.Random(config.seed)
         self.grid = self._new_grid()
         self.pattern_cells = self._pattern_cells()
         self.path_coords: list[Coord] = []
@@ -182,10 +180,13 @@ class MazeGenerator:
                 stack.pop()
 
     def generate(self) -> None:
-        """Build a new maze and store it with its shortest path.
+        """Build a new maze, store it with its shortest path and write it.
 
         Every call gives a different maze; the sequence of mazes is the
         same for a given seed.
+
+        Raises:
+            OSError: If the output file cannot be written.
         """
         self.grid = self._new_grid()
         visited = [[False] * self.width for _ in range(self.height)]
@@ -198,6 +199,8 @@ class MazeGenerator:
             self._braid()
 
         self.solution, self.path_coords = self.solve()
+        write_output(self.output_file, self.grid, self.entry, self.exit,
+                     self.solution)
 
     def solve(self) -> tuple[str, list[Coord]]:
         """Find the shortest path from entry to exit with a BFS.
