@@ -67,7 +67,18 @@ def config_read(path: str) -> dict[str, str]:
 
 
 def _parse_cell(key: str, value: str) -> Coord:
-    """Convert an 'x,y' string to a coordinate or raise ConfigError."""
+    """Convert an 'x,y' string to a coordinate.
+
+    Args:
+        key: Name of the key, used in error messages.
+        value: Text to convert, e.g. "19,14".
+
+    Returns:
+        The coordinate (x, y).
+
+    Raises:
+        ConfigError: If the value is not two integers separated by a comma.
+    """
     parts = value.split(",")
     if len(parts) != 2:
         raise ConfigError(f"{key} must be in 'x,y' format, got '{value}'")
@@ -81,7 +92,18 @@ def _parse_cell(key: str, value: str) -> Coord:
 
 
 def _parse_int(key: str, value: str) -> int:
-    """Convert a string to an int or raise ConfigError."""
+    """Convert a string to an int.
+
+    Args:
+        key: Name of the key, used in error messages.
+        value: Text to convert.
+
+    Returns:
+        The integer value.
+
+    Raises:
+        ConfigError: If the value is not an integer.
+    """
     try:
         return int(value)
     except ValueError:
@@ -89,7 +111,18 @@ def _parse_int(key: str, value: str) -> int:
 
 
 def _parse_size(key: str, value: str) -> int:
-    """Convert a maze size to an int between 1 and MAX_SIZE."""
+    """Convert a maze size to an int between 1 and MAX_SIZE.
+
+    Args:
+        key: Name of the key (WIDTH or HEIGHT), used in error messages.
+        value: Text to convert.
+
+    Returns:
+        The size.
+
+    Raises:
+        ConfigError: If the value is not an integer or is out of range.
+    """
     size = _parse_int(key, value)
     if size < 1 or size > MAX_SIZE:
         raise ConfigError(
@@ -98,7 +131,18 @@ def _parse_size(key: str, value: str) -> int:
 
 
 def _parse_bool(key: str, value: str) -> bool:
-    """Convert 'True' / 'False' (any case) to a bool."""
+    """Convert 'True' / 'False' (any case) to a bool.
+
+    Args:
+        key: Name of the key, used in error messages.
+        value: Text to convert.
+
+    Returns:
+        The boolean value.
+
+    Raises:
+        ConfigError: If the value is neither True nor False.
+    """
     if value.lower() == "true":
         return True
     if value.lower() == "false":

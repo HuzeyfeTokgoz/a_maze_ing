@@ -63,25 +63,25 @@ class MazeGenerator:
                 too small for loops when PERFECT is False.
         """
         config = parse_config(path)
-        width, height = config.width, config.height
 
         size = self.MIN_LOOP_SIZE
-        if not config.perfect and (width < size or height < size):
+        if not config.perfect and (config.width < size
+                                   or config.height < size):
             raise ValueError(
                 f"PERFECT=False needs a maze of at least {size}x{size}, "
-                f"got {width}x{height}")
+                f"got {config.width}x{config.height}")
 
         for name, (x, y) in (("ENTRY", config.entry), ("EXIT", config.exit)):
-            if not (0 <= x < width and 0 <= y < height):
+            if not (0 <= x < config.width and 0 <= y < config.height):
                 raise ValueError(
                     f"{name} ({x}, {y}) is outside the maze "
-                    f"({width}x{height})")
+                    f"({config.width}x{config.height})")
 
         if config.entry == config.exit:
             raise ValueError("ENTRY and EXIT must be different cells")
 
-        self.width = width
-        self.height = height
+        self.width = config.width
+        self.height = config.height
         self.entry = config.entry
         self.exit = config.exit
         self.perfect = config.perfect
@@ -98,18 +98,37 @@ class MazeGenerator:
                 raise ValueError(f"{name} {cell} is inside the '42' pattern")
 
     def _new_grid(self) -> list[list[int]]:
-        """Return a grid where every cell has its 4 walls closed."""
+        """Create a grid where every cell has its 4 walls closed.
+
+        Returns:
+            A height x width grid filled with 15, indexed as grid[y][x].
+        """
         grid: list[list[int]] = []
         for _ in range(self.height):
             grid.append([15] * self.width)
         return grid
 
     def _in_bounds(self, x: int, y: int) -> bool:
-        """Return True if (x, y) is inside the maze."""
+        """Check if a cell is inside the maze.
+
+        Args:
+            x: Column of the cell.
+            y: Row of the cell.
+
+        Returns:
+            True if (x, y) is inside the maze, False otherwise.
+        """
         return 0 <= x < self.width and 0 <= y < self.height
 
     def _pattern_cells(self) -> set[Coord]:
-        """Return the cells of the '42', or an empty set if it does not fit."""
+        """Place the '42' pattern in the middle of the maze.
+
+        The pattern must keep at least one free cell between it and the
+        border, so it needs a maze of at least 9x7.
+
+        Returns:
+            The cells of the '42', or an empty set if it does not fit.
+        """
         cx, cy = self.width // 2, self.height // 2
         if (cx - 3 < 1 or cx + 3 > self.width - 2
                 or cy - 2 < 1 or cy + 2 > self.height - 2):
@@ -121,7 +140,14 @@ class MazeGenerator:
         return cells
 
     def _remove_wall(self, x: int, y: int, direction: str) -> None:
-        """Open the wall of (x, y) in a direction, on both sides."""
+        """Open a wall on both sides, so the two cells stay coherent.
+
+        Args:
+            x: Column of the cell.
+            y: Row of the cell.
+            direction: Wall to open: "N", "E", "S" or "W". The neighbour
+                in that direction must be inside the maze.
+        """
         bit, opposite, dx, dy = self.DIRECTIONS[direction]
         opposite_bit = self.DIRECTIONS[opposite][0]
 
@@ -157,7 +183,16 @@ class MazeGenerator:
                         self._remove_wall(x, y, self._rng.choice(closed))
 
     def _carve(self, visited: list[list[bool]]) -> None:
-        """Carve a perfect maze from the entry with a depth-first search."""
+        """Carve a perfect maze from the entry with a depth-first search.
+
+        An explicit stack is used instead of recursion, so big mazes do not
+        hit Python's recursion limit.
+
+        Args:
+            visited: Cells already used, indexed as visited[y][x]. The '42'
+                cells must be marked True so they stay closed. Updated in
+                place.
+        """
         start_x, start_y = self.entry
         visited[start_y][start_x] = True
         stack = [self.entry]

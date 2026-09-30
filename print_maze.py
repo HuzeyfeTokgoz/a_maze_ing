@@ -6,13 +6,33 @@ Coord = tuple[int, int]
 
 
 def _paint(text: str, color: str) -> str:
-    """Return text wrapped in the given ANSI colour."""
+    """Wrap text in an ANSI colour.
+
+    Args:
+        text: Text to colour.
+        color: ANSI escape code of the colour.
+
+    Returns:
+        The coloured text, followed by a reset code.
+    """
     return f"{color}{text}{RESET}"
 
 
 def _cell_content(cell: Coord, value: int, entry: Coord, exit: Coord,
                   path: set[Coord], theme: Theme) -> str:
-    """Return the 3-character inside of a cell, already coloured."""
+    """Build the 3-character inside of a cell.
+
+    Args:
+        cell: Coordinates (x, y) of the cell.
+        value: Wall bitmask of the cell; 15 means a '42' cell.
+        entry: Entry cell, drawn as 'E'.
+        exit: Exit cell, drawn as 'X'.
+        path: Cells of the shortest path, drawn as '*'.
+        theme: Colours to use.
+
+    Returns:
+        The coloured inside of the cell, or 3 spaces for an empty cell.
+    """
     if cell == entry:
         return _paint(" E ", theme.marker)
     if cell == exit:

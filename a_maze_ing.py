@@ -8,7 +8,15 @@ from themes import THEMES
 
 def draw_maze(generator: MazeGenerator, show_path: bool,
               theme_index: int) -> None:
-    """Draw the maze with the chosen theme, with or without the path."""
+    """Draw the maze with the chosen theme, with or without the path.
+
+    Also prints a warning when the maze is too small for the '42'.
+
+    Args:
+        generator: Generator holding the maze to draw.
+        show_path: True to draw the shortest path.
+        theme_index: Index of the theme in THEMES.
+    """
     if show_path:
         path = generator.path_coords
     else:
